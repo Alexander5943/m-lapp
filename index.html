@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mål — mina årslistor</title>
+<meta name="theme-color" content="#f5efe6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mål">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5efe6;
+    --card:#fffaf3;
+    --ink:#2a2522;
+    --soft:#5d544e;
+    --muted:#9a8f86;
+    --line:#e7ddd1;
+    --accent:#b8644a;
+    --accent-soft:#f1dcd2;
+    --sage:#7f9273;
+    --sage-soft:#e3e9dc;
+    --shadow:0 1px 2px rgba(60,40,20,.04),0 12px 40px -12px rgba(80,50,30,.14);
+    --r:22px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:"Manrope",system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1100px 600px at 8% -10%, #f3d9cc 0%, transparent 60%),
+      radial-gradient(900px 600px at 105% 15%, #dfe6d6 0%, transparent 55%),
+      radial-gradient(800px 500px at 50% 120%, #efe0cf 0%, transparent 60%),
+      var(--paper);
+    background-attachment:fixed;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:.35;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .35  0 0 0 0 .28  0 0 0 .09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  button{font:inherit;color:inherit;cursor:pointer}
+  input{font:inherit;color:inherit}
+
+  .app{position:relative;max-width:1120px;margin:0 auto;padding:36px 28px 60px;display:grid;grid-template-columns:270px 1fr;gap:34px;min-height:100%}
+
+  /* Sidebar */
+  aside{position:sticky;top:36px;align-self:start}
+  .brand{font-family:"Instrument Serif",serif;font-size:44px;line-height:1;letter-spacing:-.5px;margin:4px 0 6px}
+  .brand em{color:var(--accent)}
+  .tag{color:var(--muted);font-size:13.5px;margin:0 0 28px}
+  .label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 10px 4px}
+  .lists{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+  .li-btn{
+    display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid transparent;
+    background:rgba(255,250,243,.45);padding:12px 14px;border-radius:16px;transition:.2s ease;
+  }
+  .li-btn:hover{background:rgba(255,250,243,.85)}
+  .li-btn.active{background:var(--card);border-color:var(--line);box-shadow:var(--shadow)}
+  .li-title{font-family:"Instrument Serif",serif;font-size:24px;line-height:1.05;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .li-meta{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .ring{flex:none;width:30px;height:30px}
+  .ring circle{fill:none;stroke-width:3}
+  .ring .bg{stroke:var(--line)}
+  .ring .fg{stroke:var(--sage);stroke-linecap:round;transition:stroke-dashoffset .5s ease}
+  .new-btn{
+    width:100%;border:1.5px dashed #d8cbbd;background:transparent;border-radius:16px;padding:12px 14px;
+    color:var(--soft);font-weight:600;font-size:14px;display:flex;align-items:center;gap:10px;transition:.2s;
+  }
+  .new-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(255,250,243,.5)}
+  .new-btn .plus{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-size:18px;line-height:1}
+
+  /* Main card */
+  main{min-width:0}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);
+    padding:44px 48px 34px;position:relative;overflow:hidden;
+  }
+  .card::after{
+    content:"";position:absolute;right:-80px;top:-80px;width:260px;height:260px;border-radius:50%;
+    background:radial-gradient(circle,var(--accent-soft),transparent 70%);opacity:.7;pointer-events:none;
+  }
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px;position:relative;z-index:1}
+  .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .actions{display:flex;gap:8px}
+  .pill{
+    border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600;
+    display:inline-flex;align-items:center;gap:7px;transition:.2s;
+  }
+  .pill:hover{border-color:#d4c5b6}
+  .pill.primary{background:var(--ink);color:#fbf6ef;border-color:var(--ink)}
+  .pill.primary:hover{background:#3d3531}
+  .pill.ghost{background:transparent}
+  .pill.ghost:hover{color:var(--accent);border-color:var(--accent-soft)}
+  .title-in{
+    position:relative;z-index:1;width:100%;border:0;background:transparent;outline:none;padding:0;margin:4px 0 2px;
+    font-family:"Instrument Serif",serif;font-size:clamp(64px,10vw,112px);line-height:1;letter-spacing:-2px;color:var(--ink);
+  }
+  .title-in::placeholder{color:#d6cabd}
+  .sub{color:var(--muted);font-size:14.5px;margin:0 0 26px;position:relative;z-index:1}
+  .sub i{font-family:"Instrument Serif",serif;font-size:19px;color:var(--soft)}
+
+  .progress{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+  .bar{flex:1;height:8px;border-radius:99px;background:#f0e7dc;overflow:hidden}
+  .bar span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--sage),#a6b593);transition:width .6s cubic-bezier(.2,.8,.2,1)}
+  .pct{font-size:13px;font-weight:600;color:var(--soft);font-variant-numeric:tabular-nums;min-width:110px;text-align:right}
+
+  .goals{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+  .goal{display:flex;align-items:center;gap:14px;padding:14px 4px;border-bottom:1px solid var(--line);animation:in .35s ease both}
+  @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .check{
+    flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid #cdbfb1;background:#fff;display:grid;place-items:center;
+    transition:.25s cubic-bezier(.2,.8,.2,1);padding:0;
+  }
+  .check:hover{border-color:var(--sage)}
+  .check svg{width:14px;height:14px;stroke:#fff;stroke-width:3;fill:none;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .3s ease .05s}
+  .goal.done .check{background:var(--sage);border-color:var(--sage);transform:scale(1.05)}
+  .goal.done .check svg{stroke-dashoffset:0}
+  .gtext{flex:1;min-width:0;border:0;outline:none;background:transparent;font-size:17px;padding:4px 0;transition:color .25s}
+  .goal.done .gtext{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(127,146,115,.7);text-decoration-thickness:1.5px}
+  .num{font-family:"Instrument Serif",serif;font-style:italic;color:#c9b9a9;font-size:18px;width:22px;text-align:right;flex:none}
+  .del{opacity:0;border:0;background:transparent;color:var(--muted);width:30px;height:30px;border-radius:50%;font-size:18px;transition:.2s;flex:none}
+  .goal:hover .del,.del:focus{opacity:1}
+  .del:hover{background:var(--accent-soft);color:var(--accent)}
+
+  .add{display:flex;align-items:center;gap:14px;padding:16px 4px 4px}
+  .add .plus{flex:none;width:26px;height:26px;border-radius:50%;border:1.5px dashed #cdbfb1;display:grid;place-items:center;color:var(--muted);font-size:16px;margin-left:36px}
+  .add input{flex:1;border:0;outline:none;background:transparent;font-size:17px;padding:6px 0}
+  .add input::placeholder{color:#b9ada2}
+
+  .foot{display:flex;justify-content:space-between;align-items:center;margin-top:26px;font-size:12.5px;color:var(--muted);gap:10px;flex-wrap:wrap}
+  .status{display:inline-flex;align-items:center;gap:7px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--sage)}
+  .status.saving .dot{background:#d3a35b;animation:pulse 1s infinite}
+  .status.error .dot{background:var(--accent)}
+  @keyframes pulse{50%{opacity:.3}}
+  .done-badge{display:none;background:var(--sage-soft);color:#56684b;padding:6px 12px;border-radius:999px;font-weight:600}
+  .all-done .done-badge{display:inline-block;animation:in .4s ease}
+
+  .empty-goals{padding:34px 4px 10px;color:var(--muted);font-family:"Instrument Serif",serif;font-style:italic;font-size:22px}
+
+  /* Empty state */
+  .empty{text-align:center;padding:80px 30px}
+  .empty h2{font-family:"Instrument Serif",serif;font-weight:400;font-size:54px;margin:0 0 8px;letter-spacing:-1px}
+  .empty p{color:var(--muted);margin:0 0 26px}
+
+  /* Dialog */
+  .overlay{position:fixed;inset:0;background:rgba(42,37,34,.28);backdrop-filter:blur(4px);display:none;place-items:center;z-index:20;padding:20px}
+  .overlay.show{display:grid;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0}}
+  .dialog{background:var(--card);border-radius:20px;padding:28px;max-width:380px;width:100%;box-shadow:0 30px 80px -20px rgba(40,25,15,.35)}
+  .dialog h3{font-family:"Instrument Serif",serif;font-weight:400;font-size:30px;margin:0 0 6px}
+  .dialog p{color:var(--soft);margin:0 0 22px;font-size:14.5px;line-height:1.5}
+  .dialog .row{display:flex;justify-content:flex-end;gap:8px}
+  .pill.danger{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);opacity:0;background:var(--ink);color:#fbf6ef;padding:11px 18px;border-radius:999px;font-size:13.5px;font-weight:600;transition:.3s;pointer-events:none;z-index:30}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+
+  @media (max-width:820px){
+    .app{grid-template-columns:1fr;gap:20px;
+      padding:calc(22px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left))}
+    .gtext,.add input{font-size:16px}
+    aside{position:static}
+    .brand{font-size:38px}
+    .tag{margin-bottom:16px}
+    .lists{flex-direction:row;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
+    .lists::-webkit-scrollbar{display:none}
+    .li-btn{width:auto;flex:none;padding:10px 14px}
+    .li-title{font-size:21px}
+    .card{padding:30px 22px 24px}
+    .del{opacity:.6}
+    .add .plus{margin-left:0}
+    .num{display:none}
+    .pct{min-width:0}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">Mål<em>.</em></div>
+    <p class="tag">Ett år i taget. Ett mål i taget.</p>
+    <div class="label">Mina listor</div>
+    <div class="lists" id="lists"></div>
+    <button class="new-btn" id="newList"><span class="plus">+</span>Ny lista</button>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="dialog" role="dialog" aria-modal="true">
+    <h3>Ta bort listan?</h3>
+    <p id="dlgText">Listan och alla mål i den försvinner.</p>
+    <div class="row">
+      <button class="pill" id="dlgCancel">Avbryt</button>
+      <button class="pill danger" id="dlgOk">Ta bort</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const LS_KEY = "malapp.lists.v1";
+  let lists = [];
+  let activeId = null;
+  let db = null, col = null, mode = "local";
+  let definitive = false;
+  const dirty = new Set();
+  const deleting = new Set();
+  const timers = {};
+  const chains = {};
+  let saveState = "saved";
+
+  const $ = (id) => document.getElementById(id);
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+
+  function el(tag, attrs, ...kids){
+    const n = document.createElement(tag);
+    if (attrs) for (const k in attrs){
+      if (k === "class") n.className = attrs[k];
+      else if (k.startsWith("on")) n.addEventListener(k.slice(2), attrs[k]);
+      else if (k === "value") n.value = attrs[k];
+      else if (k === "html") n.innerHTML = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    }
+    for (const c of kids){ if (c == null) continue; n.append(c.nodeType ? c : document.createTextNode(c)); }
+    return n;
+  }
+
+  /* ---------- lokal lagring ---------- */
+  function loadLocal(){
+    try { const r = localStorage.getItem(LS_KEY); return r ? JSON.parse(r) : null; } catch(e){ return null; }
+  }
+  function saveLocal(){
+    try { localStorage.setItem(LS_KEY, JSON.stringify({ lists, activeId })); } catch(e){}
+  }
+
+  /* ---------- hjälpare ---------- */
+  function sorted(){
+    return [...lists].sort((a, b) =>
+      String(b.title || "").localeCompare(String(a.title || ""), "sv", { numeric: true }) || (a.createdAt - b.createdAt));
+  }
+  function active(){ return lists.find(l => l.id === activeId) || null; }
+  function stats(l){
+    const total = (l.goals || []).length;
+    const done = (l.goals || []).filter(g => g.done).length;
+    return { total, done, pct: total ? Math.round(done / total * 100) : 0 };
+  }
+  function suggestTitle(){
+    const now = new Date();
+    let y = now.getMonth() >= 9 ? now.getFullYear() + 1 : now.getFullYear();
+    const used = new Set(lists.map(l => String(l.title).trim()));
+    while (used.has(String(y))) y++;
+    return String(y);
+  }
+
+  /* ---------- sparande ---------- */
+  function setStatus(s){ saveState = s; renderStatus(); }
+  function renderStatus(){
+    const s = document.querySelector(".status");
+    if (!s) return;
+    s.className = "status " + saveState;
+    const txt = s.querySelector("span:last-child");
+    if (saveState === "saving") txt.textContent = "Sparar…";
+    else if (saveState === "error") txt.textContent = "Kunde inte spara — försöker igen när du ändrar något";
+    else txt.textContent = mode === "cloud" ? "Allt sparat" : "Sparat på din enhet";
+  }
+
+  function touch(list){
+    list.updatedAt = Date.now();
+    dirty.add(list.id);
+    saveLocal();
+    setStatus("saving");
+    clearTimeout(timers[list.id]);
+    timers[list.id] = setTimeout(() => flush(list.id), 500);
+  }
+
+  function writeDoc(id, body, retried){
+    return col.doc(id).set(body).catch(e => {
+      if (e && e.code === "unavailable" && !retried)
+        return new Promise(r => setTimeout(r, 400 + Math.random() * 600)).then(() => writeDoc(id, body, true));
+      throw e;
+    });
+  }
+
+  function flush(id){
+    clearTimeout(timers[id]); delete timers[id];
+    const l = lists.find(x => x.id === id);
+    if (!l){ dirty.delete(id); refreshSaved(); return Promise.resolve(); }
+    if (mode !== "cloud"){ dirty.delete(id); saveLocal(); refreshSaved(); return Promise.resolve(); }
+    const body = clone({ title: l.title, goals: l.goals, createdAt: l.createdAt, updatedAt: l.updatedAt });
+    chains[id] = (chains[id] || Promise.resolve())
+      .then(() => writeDoc(id, body))
+      .then(() => { if (!timers[id]) dirty.delete(id); refreshSaved(); })
+      .catch(handleErr);
+    return chains[id];
+  }
+
+  function flushAll(){ return Promise.all([...dirty].map(flush)); }
+
+  function refreshSaved(){
+    if (dirty.size === 0 && Object.keys(timers).length === 0) setStatus("saved");
+  }
+
+  function handleErr(e){
+    if (e && (e.code === "invalid_argument" || e.code === "revoked" || e.code === "not_granted" || e.code === "capability_disabled")){
+      mode = "local"; dirty.clear(); saveLocal(); setStatus("saved");
+    } else {
+      setStatus("error");
+    }
+  }
+
+  function removeList(id){
+    lists = lists.filter(l => l.id !== id);
+    dirty.delete(id); clearTimeout(timers[id]); delete timers[id];
+    if (activeId === id) activeId = (sorted()[0] || {}).id || null;
+    saveLocal();
+    if (mode === "cloud"){
+      deleting.add(id);
+      setStatus("saving");
+      (chains[id] || Promise.resolve())
+        .then(() => col.doc(id).delete())
+        .then(() => { deleting.delete(id); refreshSaved(); })
+        .catch(e => { deleting.delete(id); handleErr(e); });
+    }
+    render();
+  }
+
+  /* ---------- rendering ---------- */
+  function ring(pct){
+    const r = 12, c = 2 * Math.PI * r;
+    return el("span", { html:
+      `<svg class="ring" viewBox="0 0 30 30"><circle class="bg" cx="15" cy="15" r="${r}"/>` +
+      `<circle class="fg" cx="15" cy="15" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${c - c * pct / 100}" transform="rotate(-90 15 15)"/></svg>` });
+  }
+
+  function renderSidebar(){
+    const box = $("lists"); box.innerHTML = "";
+    for (const l of sorted()){
+      const s = stats(l);
+      box.append(el("button", {
+        class: "li-btn" + (l.id === activeId ? " active" : ""),
+        onclick: () => { activeId = l.id; saveLocal(); render(); }
+      }, ring(s.pct),
+        el("span", { class: "li-title" }, l.title || "Namnlös"),
+        el("span", { class: "li-meta" }, s.total ? `${s.done}/${s.total}` : "–")));
+    }
+  }
+
+  function renderMain(){
+    const main = $("main");
+    const l = active();
+    // spara fokus
+    const ae = document.activeElement;
+    const fk = ae && ae.dataset ? ae.dataset.k : null;
+    const sel = fk && typeof ae.selectionStart === "number" ? [ae.selectionStart, ae.selectionEnd] : null;
+
+    main.innerHTML = "";
+    if (!l){
+      main.append(el("div", { class: "card empty" },
+        el("h2", null, "Börja med ett år"),
+        el("p", null, "Skapa en lista, ge den ett år som rubrik och skriv ner det du vill uppnå."),
+        el("button", { class: "pill primary", onclick: createList }, "+ Skapa första listan")));
+      return;
+    }
+    const s = stats(l);
+    const card = el("div", { class: "card" + (s.total && s.done === s.total ? " all-done" : "") });
+
+    card.append(el("div", { class: "topbar" },
+      el("span", { class: "eyebrow" }, "Mina mål för"),
+      el("div", { class: "actions" },
+        el("button", { class: "pill ghost", title: "Ta bort listan", onclick: () => askDelete(l) }, "Ta bort"),
+        el("button", { class: "pill primary", onclick: () => { flushAll().then(() => toast("Listan är sparad ✓")); } }, "Spara"))));
+
+    const title = el("input", { class: "title-in", value: l.title, placeholder: "2027", "data-k": "title", "aria-label": "Rubrik" });
+    title.addEventListener("input", () => { l.title = title.value; touch(l); renderSidebar(); });
+    title.addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); card.querySelector(".add input").focus(); } });
+    card.append(title);
+
+    card.append(el("p", { class: "sub" },
+      s.total ? el("i", null, s.done === s.total ? "Allt avbockat. Snyggt jobbat." : "Små steg, stora år.") : el("i", null, "Vad vill du uppnå i år?")));
+
+    card.append(el("div", { class: "progress" },
+      el("div", { class: "bar" }, el("span", { style: `width:${s.pct}%` })),
+      el("span", { class: "pct" }, `${s.done} av ${s.total} klara`)));
+
+    const ul = el("ul", { class: "goals" });
+    (l.goals || []).forEach((g, i) => {
+      const input = el("input", { class: "gtext", value: g.text, "data-k": "g-" + g.id, "aria-label": "Mål" });
+      input.addEventListener("input", () => { g.text = input.value; touch(l); });
+      input.addEventListener("keydown", e => {
+        if (e.key === "Enter"){ e.preventDefault(); card.querySelector(".add input").focus(); }
+        if (e.key === "Backspace" && input.value === ""){
+          e.preventDefault();
+          const prev = l.goals[i - 1];
+          l.goals.splice(i, 1); touch(l); render();
+          const target = prev ? document.querySelector(`[data-k="g-${prev.id}"]`) : document.querySelector(".add input");
+          if (target) target.focus();
+        }
+      });
+      ul.append(el("li", { class: "goal" + (g.done ? " done" : "") },
+        el("span", { class: "num" }, String(i + 1)),
+        el("button", { class: "check", "aria-label": g.done ? "Markera som ej klar" : "Markera som klar",
+          html: '<svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+          onclick: () => { g.done = !g.done; touch(l); render(); } }),
+        input,
+        el("button", { class: "del", "aria-label": "Ta bort mål", onclick: () => { l.goals.splice(i, 1); touch(l); render(); } }, "×")));
+    });
+    card.append(ul);
+    if (!l.goals.length) card.append(el("div", { class: "empty-goals" }, "Inga mål ännu — skriv ditt första nedan."));
+
+    const addIn = el("input", { placeholder: "Lägg till ett mål och tryck Enter…", "data-k": "add", "aria-label": "Nytt mål" });
+    addIn.addEventListener("keydown", e => {
+      if (e.key === "Enter" && addIn.value.trim()){
+        l.goals.push({ id: newId(), text: addIn.value.trim(), done: false });
+        addIn.value = ""; touch(l); render();
+        const a = document.querySelector('[data-k="add"]'); if (a) a.focus();
+      }
+    });
+    card.append(el("div", { class: "add" }, el("span", { class: "plus" }, "+"), addIn));
+
+    card.append(el("div", { class: "foot" },
+      el("span", { class: "status" }, el("span", { class: "dot" }), el("span")),
+      el("span", { class: "done-badge" }, "✦ Alla mål uppfyllda")));
+
+    main.append(card);
+    renderStatus();
+
+    if (fk){
+      const t = main.querySelector(`[data-k="${fk}"]`);
+      if (t){ t.focus(); if (sel) try { t.setSelectionRange(sel[0], sel[1]); } catch(e){} }
+    }
+  }
+
+  function render(){ renderSidebar(); renderMain(); }
+
+  /* ---------- åtgärder ---------- */
+  function createList(){
+    const l = { id: newId(), title: suggestTitle(), goals: [], createdAt: Date.now(), updatedAt: Date.now() };
+    lists.push(l); activeId = l.id;
+    touch(l); render();
+    const t = document.querySelector(".title-in");
+    if (t){ t.focus(); t.select(); }
+  }
+
+  let pendingDelete = null;
+  function askDelete(l){
+    pendingDelete = l.id;
+    $("dlgText").textContent = `”${l.title || "Namnlös"}” och alla mål i den försvinner.`;
+    $("overlay").classList.add("show");
+    $("dlgOk").focus();
+  }
+  function closeDlg(){ $("overlay").classList.remove("show"); pendingDelete = null; }
+  $("dlgCancel").onclick = closeDlg;
+  $("overlay").addEventListener("click", e => { if (e.target.id === "overlay") closeDlg(); });
+  $("dlgOk").onclick = () => { const id = pendingDelete; closeDlg(); if (id){ removeList(id); toast("Listan togs bort"); } };
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeDlg(); });
+  $("newList").onclick = createList;
+
+  let tt;
+  function toast(msg){
+    const t = $("toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 1800);
+  }
+
+  /* ---------- start ---------- */
+  const local = loadLocal();
+  if (local && Array.isArray(local.lists)){ lists = local.lists; activeId = local.activeId; }
+  if (!active()) activeId = (sorted()[0] || {}).id || null;
+  render();
+
+  async function connect(){
+    if (!window.claude || typeof window.claude.use !== "function") return;
+    try {
+      const [d, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+      if (!d || !user) return;
+      const id = await user.id();
+      if (!id) return;
+      db = d; col = db.collection("data/users/" + id);
+      mode = "cloud";
+      renderStatus();
+      const localAtStart = clone(lists);
+      let lastJson = "";
+      col.onSnapshot(snap => {
+        const remote = snap.docs.map(doc => Object.assign({ id: doc.id }, clone(doc.data() || {})));
+        if (!definitive){
+          if (snap.metadata.fromCache && snap.empty) return;
+          if (!snap.metadata.fromCache){
+            definitive = true;
+            const ids = new Set(remote.map(r => r.id));
+            const missing = localAtStart.filter(l => !ids.has(l.id));
+            if (missing.length){
+              for (const m of missing){ const cur = lists.find(x => x.id === m.id) || m; if (!lists.includes(cur)) lists.push(cur); touch(cur); }
+            }
+          }
+        }
+        const map = new Map(remote.map(r => [r.id, r]));
+        for (const l of lists) if (dirty.has(l.id) || timers[l.id]) map.set(l.id, l);
+        for (const id of deleting) map.delete(id);
+        const next = [...map.values()].map(x => Object.assign({ goals: [] }, x));
+        const json = JSON.stringify(next);
+        if (json === lastJson) return;
+        lastJson = json;
+        // behåll objektreferenser för listor som redigeras
+        lists = next.map(n => (dirty.has(n.id) ? (lists.find(l => l.id === n.id) || n) : n));
+        if (!active()) activeId = (sorted()[0] || {}).id || null;
+        saveLocal();
+        render();
+      }, err => handleErr(err));
+    } catch(e){ /* stannar i lokalt läge */ }
+  }
+  connect();
+
+  if ("serviceWorker" in navigator && location.protocol === "https:"){
+    window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+  }
+})();
+</script>
+</body>
+</html>
